@@ -1,0 +1,25 @@
+ · YML
+name: towel-watch
+ 
+on:
+  workflow_dispatch:          # 可手動按 Run workflow 立即開始
+  schedule:
+    - cron: "0 */5 * * *"     # 每 5 小時接力一輪（UTC）
+ 
+concurrency:
+  group: towel-watch
+  cancel-in-progress: false   # 上一輪還在跑就排隊，不會重疊
+ 
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Watch stock
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: python watch_towel.py
